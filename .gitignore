@@ -27,3 +27,13 @@ yarn-error.log*
 .vscode/
 *.sublime-project
 *.sublime-workspace
+# vendor deps
+/backend/vendor/
+*.pyc
+__pycache__/
+
+# dotfiles
+pnpm-workspace.yaml
+
+# data (auto-generated)
+/data/memos.json

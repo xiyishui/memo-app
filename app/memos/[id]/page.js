@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { relativeTime, formatTime } from '../utils';
-import { useToast, default as Toast } from '../toast';
+import { relativeTime, formatTime } from '../../utils';
+import { useToast, default as Toast } from '../../toast';
 
 export default function MemoDetail() {
   const { id } = useParams();

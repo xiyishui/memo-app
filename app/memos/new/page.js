@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, default as Toast } from '../toast';
+import { useToast, default as Toast } from '../../toast';
 
 export default function NewMemo() {
   const router = useRouter();

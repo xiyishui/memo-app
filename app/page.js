@@ -7,6 +7,7 @@ export default function Home() {
   const [memos, setMemos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('updatedAt-desc');
 
   useEffect(() => {
     fetch('/api/memos')
@@ -30,6 +31,19 @@ export default function Home() {
       memo.title.toLowerCase().includes(q) ||
       memo.content.toLowerCase().includes(q)
     );
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'updatedAt-asc':
+        return new Date(a.updatedAt) - new Date(b.updatedAt);
+      case 'title-asc':
+        return a.title.localeCompare(b.title, 'zh-CN');
+      case 'title-desc':
+        return b.title.localeCompare(a.title, 'zh-CN');
+      case 'createdAt-desc':
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      default: // 'updatedAt-desc'
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+    }
   });
 
   return (
@@ -48,6 +62,25 @@ export default function Home() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+
+      {!loading && memos.length > 0 && (
+        <div className="toolbar">
+          <span className="toolbar-count">{filteredMemos.length} 条</span>
+          <div className="toolbar-sort">
+            <select
+              className="sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="updatedAt-desc">最近更新</option>
+              <option value="updatedAt-asc">最早更新</option>
+              <option value="createdAt-desc">最新创建</option>
+              <option value="title-asc">标题 A-Z</option>
+              <option value="title-desc">标题 Z-A</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="loading">加载中...</div>

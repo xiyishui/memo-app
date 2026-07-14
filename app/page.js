@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { relativeTime } from './utils';
+import { useToast, default as Toast } from './toast';
 
 export default function Home() {
   const [memos, setMemos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('updatedAt-desc');
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     fetch('/api/memos')
@@ -18,11 +21,6 @@ export default function Home() {
       })
       .catch(() => setLoading(false));
   }, []);
-
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  };
 
   const filteredMemos = memos.filter((memo) => {
     if (!searchQuery.trim()) return true;
@@ -101,12 +99,14 @@ export default function Home() {
               <Link href={`/memos/${memo.id}`}>
                 <h3>{memo.title}</h3>
                 <div className="preview">{memo.content}</div>
-                <div className="time">{formatTime(memo.updatedAt)}</div>
+                <div className="time">{relativeTime(memo.updatedAt)}</div>
               </Link>
             </li>
           ))}
         </ul>
       )}
+
+      <Toast toast={toast} />
     </div>
   );
 }

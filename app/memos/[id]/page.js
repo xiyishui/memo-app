@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { relativeTime, formatTime } from '../utils';
+import { useToast, default as Toast } from '../toast';
 
 export default function MemoDetail() {
   const { id } = useParams();
@@ -13,6 +15,7 @@ export default function MemoDetail() {
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     fetch(`/api/memos/${id}`)
@@ -58,6 +61,7 @@ export default function MemoDetail() {
       const updated = await res.json();
       setMemo(updated);
       setEditing(false);
+      showToast('保存成功');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -66,20 +70,16 @@ export default function MemoDetail() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除这条备忘录吗？')) return;
+    if (typeof window !== 'undefined' && !window.confirm('确定要删除这条备忘录吗？')) return;
 
     try {
       const res = await fetch(`/api/memos/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('删除失败');
+      showToast('删除成功');
       router.push('/');
     } catch (err) {
       setError(err.message);
     }
-  };
-
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
   if (loading) return <div className="loading">加载中...</div>;
@@ -122,7 +122,7 @@ export default function MemoDetail() {
       </div>
       <div className="memo-detail">
         <div className="meta">
-          创建于 {formatTime(memo.createdAt)} &middot; 更新于 {formatTime(memo.updatedAt)}
+          创建于 {formatTime(memo.createdAt)} &middot; {relativeTime(memo.updatedAt)}更新
         </div>
         <div className="content">{memo.content}</div>
         <div className="actions">
@@ -132,6 +132,8 @@ export default function MemoDetail() {
         </div>
         {error && <p className="error-msg" style={{ marginTop: 12 }}>{error}</p>}
       </div>
+
+      <Toast toast={toast} />
     </div>
   );
 }

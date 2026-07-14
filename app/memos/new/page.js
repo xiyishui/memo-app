@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast, default as Toast } from '../toast';
 
 export default function NewMemo() {
   const router = useRouter();
@@ -9,6 +10,7 @@ export default function NewMemo() {
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const { toast, showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +34,7 @@ export default function NewMemo() {
         throw new Error(data.error || '创建失败');
       }
 
+      showToast('创建成功');
       router.push('/');
     } catch (err) {
       setError(err.message);
@@ -76,6 +79,8 @@ export default function NewMemo() {
           </button>
         </div>
       </form>
+
+      <Toast toast={toast} />
     </div>
   );
 }

@@ -1,10 +1,12 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast, default as Toast } from '../../toast';
+import { useAuth } from '../../auth';
 
 export default function NewMemo() {
+  const { user } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -25,10 +27,14 @@ export default function NewMemo() {
     try {
       const res = await fetch('/api/memos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + user.token,
+        },
         body: JSON.stringify({ title: title.trim(), content: content.trim() }),
       });
 
+      if (res.status === 401) { router.push('/login'); return; }
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || '创建失败');
@@ -41,6 +47,8 @@ export default function NewMemo() {
       setSaving(false);
     }
   };
+
+  if (!user) return null;
 
   return (
     <div>

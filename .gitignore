@@ -37,3 +37,4 @@ pnpm-workspace.yaml
 
 # data (auto-generated)
 /data/memos.json
+/data/users.json

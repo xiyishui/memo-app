@@ -273,3 +273,57 @@ body {
 .nav-bar a:hover {
   color: #1677ff;
 }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-user {
+  font-size: 13px;
+  color: #666;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card h1 {
+  font-size: 22px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.auth-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.auth-link {
+  text-align: center;
+  font-size: 14px;
+  color: #999;
+  margin-top: 16px;
+}
+
+.auth-link a {
+  color: #1677ff;
+}

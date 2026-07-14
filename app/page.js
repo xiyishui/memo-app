@@ -1,11 +1,15 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { relativeTime } from './utils';
 import { useToast, default as Toast } from './toast';
+import { useAuth } from './auth';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [memos, setMemos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,14 +17,22 @@ export default function Home() {
   const { toast, showToast } = useToast();
 
   useEffect(() => {
-    fetch('/api/memos')
-      .then((res) => res.json())
+    if (authLoading) return;
+    if (!user) { router.push('/login'); return; }
+
+    fetch('/api/memos', {
+      headers: { 'Authorization': 'Bearer ' + user.token }
+    })
+      .then((res) => {
+        if (res.status === 401) { router.push('/login'); return; }
+        return res.json();
+      })
       .then((data) => {
-        setMemos(data);
+        if (data) setMemos(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [user, authLoading, router]);
 
   const filteredMemos = memos.filter((memo) => {
     if (!searchQuery.trim()) return true;
@@ -39,10 +51,13 @@ export default function Home() {
         return b.title.localeCompare(a.title, 'zh-CN');
       case 'createdAt-desc':
         return new Date(b.createdAt) - new Date(a.createdAt);
-      default: // 'updatedAt-desc'
+      default:
         return new Date(b.updatedAt) - new Date(a.updatedAt);
     }
   });
+
+  if (authLoading) return <div className="loading">加载中...</div>;
+  if (!user) return null;
 
   return (
     <div>
@@ -65,11 +80,7 @@ export default function Home() {
         <div className="toolbar">
           <span className="toolbar-count">{filteredMemos.length} 条</span>
           <div className="toolbar-sort">
-            <select
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
+            <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="updatedAt-desc">最近更新</option>
               <option value="updatedAt-asc">最早更新</option>
               <option value="createdAt-desc">最新创建</option>
@@ -96,7 +107,7 @@ export default function Home() {
         <ul className="memo-list">
           {filteredMemos.map((memo) => (
             <li key={memo.id} className="memo-item">
-              <Link href={`/memos/${memo.id}`}>
+              <Link href={"/memos/" + memo.id}>
                 <h3>{memo.title}</h3>
                 <div className="preview">{memo.content}</div>
                 <div className="time">{relativeTime(memo.updatedAt)}</div>

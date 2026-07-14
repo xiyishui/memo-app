@@ -34,25 +34,16 @@ function generateToken() {
 
 export async function POST(request) {
   const { username, password } = await request.json();
-
   if (!username || !password) {
-    return NextResponse.json({ error: 'ÇëÊäÈëÓÃ»§ÃûºÍÃÜÂë' }, { status: 400 });
+    return NextResponse.json({ error: 'è¯·è¾“å…¥ç”¨æˆ·åå’Œå¯†ç ' }, { status: 400 });
   }
-
   const users = readUsers();
   const hashed = hashPassword(password);
   const user = users.find(u => u.username === username && u.password === hashed);
-
   if (!user) {
-    return NextResponse.json({ error: 'ÓÃ»§Ãû»òÃÜÂë´íÎó' }, { status: 401 });
+    return NextResponse.json({ error: 'ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯' }, { status: 401 });
   }
-
   user.token = generateToken();
   writeUsers(users);
-
-  return NextResponse.json({
-    id: user.id,
-    username: user.username,
-    token: user.token,
-  });
+  return NextResponse.json({ id: user.id, username: user.username, token: user.token });
 }

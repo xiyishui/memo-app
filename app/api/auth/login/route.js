@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'users.json');
 const DATA_DIR = path.join(process.cwd(), 'data');
 
-function readUsers() {
+function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
+}
+
+function readUsers() {
+  ensureDataDir();
   try {
     return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
   } catch {
@@ -16,29 +20,33 @@ function readUsers() {
   }
 }
 
+function writeUsers(users) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2), 'utf-8');
+}
+
 function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return createHash('sha256').update(password).digest('hex');
 }
 
 function generateToken() {
-  return crypto.randomUUID() + '-' + crypto.randomUUID();
+  return randomUUID() + '-' + randomUUID();
 }
 
 export async function POST(request) {
   const { username, password } = await request.json();
 
   if (!username || !password) {
-    return NextResponse.json({ error: 'è¯·è¾“å…¥ç”¨æˆ·åå’Œå¯†ç ' }, { status: 400 });
+    return NextResponse.json({ error: 'ÇëÊäÈëÓÃ»§ÃûºÍÃÜÂë' }, { status: 400 });
   }
 
   const users = readUsers();
-  const user = users.find(u => u.username === username && u.password === hashPassword(password));
+  const hashed = hashPassword(password);
+  const user = users.find(u => u.username === username && u.password === hashed);
 
   if (!user) {
-    return NextResponse.json({ error: 'ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯' }, { status: 401 });
+    return NextResponse.json({ error: 'ÓÃ»§Ãû»òÃÜÂë´íÎó' }, { status: 401 });
   }
 
-  // Generate new token each login
   user.token = generateToken();
   writeUsers(users);
 

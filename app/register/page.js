@@ -53,7 +53,7 @@ export default function RegisterPage() {
           </div>
           <div className="form-group">
             <label>密码</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少3位字符" />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少6位字符" />
           </div>
           <div className="form-group">
             <label>确认密码</label>

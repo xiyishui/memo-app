@@ -1,76 +1,40 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'memos.json');
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
-const DATA_DIR = path.join(process.cwd(), 'data');
-
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
+import fs from 'fs'; import path from 'path';
+const DF = () => path.join(process.cwd(), 'data', 'memos.json'); const UF = () => path.join(process.cwd(), 'data', 'users.json');
+function read() { try { return JSON.parse(fs.readFileSync(DF(), 'utf-8')); } catch { return []; } }
+function write(d) { fs.writeFileSync(DF(), JSON.stringify(d, null, 2), 'utf-8'); }
+function user(r) {
+  try { const tok = (r.headers.get('authorization')||'').replace('Bearer ',''); if (!tok) return null; const us = JSON.parse(fs.readFileSync(UF(),'utf-8')); return us.find(u=>u.token===tok)||null; } catch { return null; }
 }
-
-function readMemos() {
-  ensureDataDir();
-  try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-  } catch {
-    fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
-    return [];
-  }
-}
-
-function writeMemos(memos) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(memos, null, 2), 'utf-8');
-}
-
-function getUserFromToken(request) {
-  const auth = request.headers.get('authorization') || '';
-  const token = auth.replace('Bearer ', '');
-  if (!token) return null;
-  try {
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    return users.find(u => u.token === token) || null;
-  } catch {
-    return null;
-  }
-}
-
 export async function GET(request, { params }) {
-  const user = getUserFromToken(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { id } = await params;
-  const memos = readMemos();
-  const memo = memos.find((m) => m.id === Number(id) && m.userId === user.id);
-  if (!memo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(memo);
+  const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
+  const { id } = await params; const all = read(); const m = all.find(x => x.id===Number(id) && x.userId===u.id);
+  if (!m) return NextResponse.json({e:'x'},{status:404});
+  return NextResponse.json(m);
 }
-
 export async function PUT(request, { params }) {
-  const user = getUserFromToken(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { id } = await params;
-  const body = await request.json();
-  if (!body.title || !body.content) return NextResponse.json({ error: 'Invalid' }, { status: 400 });
-  const memos = readMemos();
-  const index = memos.findIndex((m) => m.id === Number(id) && m.userId === user.id);
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  memos[index].title = body.title;
-  memos[index].content = body.content;
-  memos[index].updatedAt = new Date().toISOString();
-  writeMemos(memos);
-  return NextResponse.json(memos[index]);
+  const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
+  const { id } = await params; const b = await request.json();
+  const all = read(); const i = all.findIndex(x => x.id===Number(id) && x.userId===u.id);
+  if (i===-1) return NextResponse.json({e:'x'},{status:404});
+  if (b.title !== undefined) all[i].title = b.title;
+  if (b.content !== undefined) all[i].content = b.content;
+  if (b.pinned !== undefined) all[i].pinned = b.pinned;
+  if (b.tags !== undefined) all[i].tags = b.tags;
+  all[i].updatedAt = new Date().toISOString();
+  write(all); return NextResponse.json(all[i]);
 }
-
 export async function DELETE(request, { params }) {
-  const user = getUserFromToken(request);
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
   const { id } = await params;
-  let memos = readMemos();
-  const index = memos.findIndex((m) => m.id === Number(id) && m.userId === user.id);
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  memos = memos.filter((m) => !(m.id === Number(id) && m.userId === user.id));
-  writeMemos(memos);
-  return NextResponse.json({ message: 'Deleted' });
+  const all = read(); const i = all.findIndex(x => x.id===Number(id) && x.userId===u.id);
+  if (i===-1) return NextResponse.json({e:'x'},{status:404});
+  const trashed = { ...all[i], deletedAt: new Date().toISOString() };
+  delete trashed.pinned;
+  const tf = path.join(process.cwd(), 'data', 'trash.json');
+  if (!fs.existsSync(path.dirname(tf))) fs.mkdirSync(path.dirname(tf), { recursive: true });
+  let trash = []; try { trash = JSON.parse(fs.readFileSync(tf, 'utf-8')); } catch {}
+  trash.unshift(trashed); fs.writeFileSync(tf, JSON.stringify(trash, null, 2), 'utf-8');
+  write(all.filter(x => !(x.id===Number(id) && x.userId===u.id)));
+  return NextResponse.json({ message: 'ok' });
 }

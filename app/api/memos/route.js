@@ -1,79 +1,30 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'memos.json');
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
-const DATA_DIR = path.join(process.cwd(), 'data');
-
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
-  }
+import fs from 'fs'; import path from 'path';
+const DF = () => path.join(process.cwd(), 'data', 'memos.json');
+const UF = () => path.join(process.cwd(), 'data', 'users.json');
+function ensure() {
+  if (!fs.existsSync(path.dirname(DF()))) fs.mkdirSync(path.dirname(DF()), { recursive: true });
+  if (!fs.existsSync(DF())) fs.writeFileSync(DF(), '[]', 'utf-8');
 }
-
-function getUserFromToken(request) {
-  const auth = request.headers.get('authorization') || '';
-  const token = auth.replace('Bearer ', '');
-  if (!token) return null;
+function read() { ensure(); try { return JSON.parse(fs.readFileSync(DF(), 'utf-8')); } catch { fs.writeFileSync(DF(), '[]', 'utf-8'); return []; } }
+function write(d) { fs.writeFileSync(DF(), JSON.stringify(d, null, 2), 'utf-8'); }
+function user(r) {
   try {
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    return users.find(u => u.token === token) || null;
-  } catch {
-    return null;
-  }
+    const tok = (r.headers.get('authorization')||'').replace('Bearer ','');
+    if (!tok) return null;
+    const us = JSON.parse(fs.readFileSync(UF(), 'utf-8'));
+    return us.find(u => u.token === tok) || null;
+  } catch { return null; }
 }
-
-function readMemos() {
-  ensureDataDir();
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
-    return [];
-  }
-}
-
-function writeMemos(memos) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(memos, null, 2), 'utf-8');
-}
-
-// GET /api/memos — 获取所有备忘录
 export async function GET(request) {
-  const user = getUserFromToken(request);
-  if (!user) return NextResponse.json({ error: '请先登录' }, { status: 401 });
-  const memos = readMemos();
-  return NextResponse.json(memos.filter(m => m.userId === user.id));
+  const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
+  const all = read().filter(m => m.userId === u.id);
+  return NextResponse.json(all.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||new Date(b.updatedAt)-new Date(a.updatedAt)));
 }
-
-// POST /api/memos — 创建备忘录
 export async function POST(request) {
-  const user = getUserFromToken(request);
-  if (!user) return NextResponse.json({ error: '请先登录' }, { status: 401 });
-  const body = await request.json();
-  const { title, content } = body;
-
-  if (!title || !content) {
-    return NextResponse.json({ error: '标题和内容不能为空' }, { status: 400 });
-  }
-
-  const memos = readMemos();
-  const now = new Date().toISOString();
-  const newMemo = {
-    id: Date.now(),
-    userId: user.id,
-    title,
-    content,
-    createdAt: now,
-    updatedAt: now,
-  };
-  memos.unshift(newMemo);
-  writeMemos(memos);
-
-  return NextResponse.json(newMemo, { status: 201 });
+  const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
+  const b = await request.json(); if (!b.title || !b.content) return NextResponse.json({e:'x'},{status:400});
+  const all = read();
+  all.unshift({id:Date.now(),userId:u.id,title:b.title,content:b.content,tags:b.tags||[],pinned:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  write(all); return NextResponse.json(all[0],{status:201});
 }

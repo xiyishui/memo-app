@@ -1,14 +1,14 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
     setUser(null);
-    router.push('/login');
+    // logout
   };
 
   return (

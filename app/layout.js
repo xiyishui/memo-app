@@ -1,7 +1,5 @@
 import './globals.css';
-import Link from 'next/link';
 import { AuthProvider } from './auth';
-import AuthNav from './AuthNav';
 
 export const metadata = {
   title: '个人备忘录',
@@ -13,8 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="zh-CN">
       <body>
         <AuthProvider>
-          <AuthNav />
-          <main className="container">{children}</main>
+          {children}
         </AuthProvider>
       </body>
     </html>

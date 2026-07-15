@@ -35,11 +35,11 @@ function generateToken() {
 export async function POST(request) {
   const { username, password } = await request.json();
   if (!username || !password || username.length < 2 || password.length < 6) {
-    return NextResponse.json({ error: '\u7528\u6237\u540d\u81f3\u5c112\u4f4d\uff0c\u5bc6\u7801\u81f3\u5c113\u4f4d' }, { status: 400 });
+    return NextResponse.json({ error: '用户名至少2位，密码至少3位' }, { status: 400 });
   }
   const users = readUsers();
   if (users.find(u => u.username === username)) {
-    return NextResponse.json({ error: '\u7528\u6237\u540d\u5df2\u88ab\u6ce8\u518c' }, { status: 400 });
+    return NextResponse.json({ error: '用户名已被注册' }, { status: 400 });
   }
   const newUser = {
     id: Date.now(), username,

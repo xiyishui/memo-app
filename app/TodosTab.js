@@ -1,29 +1,83 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from './auth';
 
 export default function TodosTab() {
+  const { user } = useAuth();
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState('');
 
-  const addTodo = () => {
-    if (!text.trim()) return;
-    setTodos([...todos, { id: Date.now(), text: text.trim(), done: false }]);
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/todos', {
+      headers: { 'Authorization': 'Bearer ' + user.token }
+    })
+      .then(res => res.json())
+      .then(data => { if (data) setTodos(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  const addTodo = async () => {
+    if (!text.trim() || !user) return;
+    const res = await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + user.token },
+      body: JSON.stringify({ text: text.trim() }),
+    });
+    if (res.ok) {
+      const todo = await res.json();
+      setTodos([todo, ...todos]);
+    }
     setText('');
   };
 
-  const toggleTodo = (id) => {
-    setTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggleTodo = async (todo) => {
+    if (!user) return;
+    await fetch('/api/todos/' + todo.id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + user.token },
+      body: JSON.stringify({ done: !todo.done }),
+    });
+    setTodos(todos.map(t => t.id === todo.id ? { ...t, done: !t.done } : t));
   };
 
-  const removeTodo = (id) => {
+  const startEdit = (todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  };
+
+  const saveEdit = async (id) => {
+    if (!editText.trim() || !user) return;
+    await fetch('/api/todos/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + user.token },
+      body: JSON.stringify({ text: editText.trim() }),
+    });
+    setTodos(todos.map(t => t.id === id ? { ...t, text: editText.trim() } : t));
+    setEditingId(null);
+    setEditText('');
+  };
+
+  const removeTodo = async (id) => {
+    if (!user) return;
+    await fetch('/api/todos/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + user.token },
+    });
     setTodos(todos.filter(t => t.id !== id));
   };
+
+  if (!user) return <div className="empty"><p>请先登录</p></div>;
 
   return (
     <div>
       <div className="header">
         <h1>我的代办</h1>
+        <span className="toolbar-count">{todos.filter(t => !t.done).length} 未完成</span>
       </div>
       <div className="todo-input-row">
         <input className="todo-input" placeholder="输入待办事项..."
@@ -32,16 +86,31 @@ export default function TodosTab() {
         />
         <button className="btn btn-primary" onClick={addTodo}>添加</button>
       </div>
-      {todos.length === 0 ? (
+      {loading ? (
+        <div className="loading">加载中...</div>
+      ) : todos.length === 0 ? (
         <div className="empty"><p>还没有待办事项</p></div>
       ) : (
         <ul className="todo-list">
           {todos.map(todo => (
             <li key={todo.id} className={'todo-item' + (todo.done ? ' done' : '')}>
-              <span className="todo-check" onClick={() => toggleTodo(todo.id)}>
+              <span className="todo-check" onClick={() => toggleTodo(todo)}>
                 {todo.done ? '☑' : '☐'}
               </span>
-              <span className="todo-text" onClick={() => toggleTodo(todo.id)}>{todo.text}</span>
+              {editingId === todo.id ? (
+                <input className="todo-edit-input" value={editText}
+                  onChange={e => setEditText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveEdit(todo.id); if (e.key === 'Escape') setEditingId(null); }}
+                  autoFocus
+                />
+              ) : (
+                <span className="todo-text" onClick={() => toggleTodo(todo)}>{todo.text}</span>
+              )}
+              {editingId === todo.id ? (
+                <button className="todo-del" onClick={() => saveEdit(todo.id)}>✔</button>
+              ) : (
+                <button className="todo-del" onClick={() => startEdit(todo)}>✏</button>
+              )}
               <button className="todo-del" onClick={() => removeTodo(todo.id)}>✖</button>
             </li>
           ))}

@@ -491,3 +491,12 @@ body {
 .todo-del:hover {
   color: #ff4d4f;
 }
+
+.todo-edit-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #1677ff;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}

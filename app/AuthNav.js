@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from './auth';
@@ -7,24 +6,19 @@ import { useAuth } from './auth';
 export default function AuthNav() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
-  const isAuthPage = pathname === '/login' || pathname === '/register';
 
   if (loading) return null;
 
   return (
-    <nav className="nav-bar">
-      <div className="container">
-        <Link href={user ? '/' : '/login'}>个人备忘录</Link>
-        {!isAuthPage && (
-          <div className="nav-right">
-            {user ? (
-              <>
-                <span className="nav-user">{user.username}</span>
-                <button className="btn btn-secondary btn-sm" onClick={logout}>退出</button>
-              </>
-            ) : (
-              <Link href="/login" className="btn btn-primary btn-sm">登录</Link>
-            )}
+    <nav className='nav-bar'>
+      <div className='container'>
+        <Link href='/' style={{ textDecoration: 'none', color: '#333', fontWeight: 600, fontSize: 16 }}>
+          个人备忘录
+        </Link>
+        {user && (
+          <div className='nav-right'>
+            <span className='nav-user'>{user.username}</span>
+            <button className='btn btn-secondary btn-sm' onClick={logout}>退出</button>
           </div>
         )}
       </div>

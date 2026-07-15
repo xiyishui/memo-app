@@ -40,3 +40,7 @@ pnpm-workspace.yaml
 /data/users.json
 
 /data/todos.json
+
+/data/trash.json
+/data/recent.json
+

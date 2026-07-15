@@ -1,19 +1,41 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from './auth';
 
 export default function ProfileTab({ user }) {
-  const { logout, login } = useAuth();
+  const { logout } = useAuth();
   const [page, setPage] = useState('profile');
   const [trash, setTrash] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [avatar, setAvatar] = useState('');
   const [isReg, setReg] = useState(false);
   const [un, setUn] = useState('');
   const [pw, setPw] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const fileRef = useRef(null);
+  const { login } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      var saved = ''; try { saved = localStorage.getItem('avatar_' + user.id) || ''; } catch(e) {}
+      setAvatar(saved);
+    }
+  }, [user]);
+
+  const handleAvatar = (e) => {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var data = ev.target.result;
+      setAvatar(data);
+      try { localStorage.setItem('avatar_' + user.id, data); } catch(e) {}
+    };
+    reader.readAsDataURL(file);
+  };
 
   const loadTrash = async () => {
     if (!user) return;
@@ -47,6 +69,7 @@ export default function ProfileTab({ user }) {
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
 
+  // Login form when not logged in
   if (!user) {
     return (
       <div className='profile-page'>
@@ -66,6 +89,7 @@ export default function ProfileTab({ user }) {
     );
   }
 
+  // Trash view
   if (page === 'trash') {
     return (
       <div>
@@ -82,6 +106,7 @@ export default function ProfileTab({ user }) {
     );
   }
 
+  // Recent view
   if (page === 'recent') {
     return (
       <div>
@@ -99,15 +124,21 @@ export default function ProfileTab({ user }) {
     );
   }
 
+  // Profile view
   return (
     <div className='profile-page'>
       <div className='profile-card'>
-        <div className='profile-avatar'>{user.username[0]?.toUpperCase()}</div>
+        <div className='profile-avatar-wrap' onClick={() => fileRef.current && fileRef.current.click()}>
+          {avatar ? <img src={avatar} className='avatar-img' alt='avatar' /> : <div className='profile-avatar'>{user.username[0]?.toUpperCase()}</div>}
+          <div className='camera-overlay'>{'\u{1F4F7}'}</div>
+        </div>
+        <input ref={fileRef} type='file' accept='image/*' style={{ display: 'none' }} onChange={handleAvatar} />
         <h2>{user.username}</h2>
+        <div className='profile-divider' />
         <div className='profile-menu'>
-          <button className='profile-menu-item' onClick={loadRecent}>最近查看</button>
-          <button className='profile-menu-item' onClick={loadTrash}>回收站</button>
-          <button className='profile-menu-item logout' onClick={logout}>退出登录</button>
+          <button className='profile-menu-item' onClick={loadRecent}><span className='icon'>{'\u{1F4CB}'}</span> 最近查看</button>
+          <button className='profile-menu-item' onClick={loadTrash}><span className='icon'>{'\u{1F5D1}'}</span> 回收站</button>
+          <button className='profile-menu-item logout' onClick={logout}><span className='icon'>{'\u{1F6AA}'}</span> 退出登录</button>
         </div>
       </div>
     </div>

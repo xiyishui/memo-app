@@ -528,3 +528,5 @@ body {
 .profile-menu-item.logout { margin-top: 4px; color: #ff4d4f; }
 .profile-menu-item .icon { font-size: 18px; width: 24px; text-align: center; }
 .profile-card .avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; }
+
+.fullscreen-center { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 48px); padding: 20px; }

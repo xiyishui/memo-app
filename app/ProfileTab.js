@@ -72,7 +72,7 @@ export default function ProfileTab({ user }) {
   // Login form when not logged in
   if (!user) {
     return (
-      <div className='profile-page'>
+      <div className='fullscreen-center'>
         <div className='auth-card'>
           <h1>{isReg ? '注册' : '登录'}</h1>
           <form onSubmit={handleLogin}>

@@ -82,7 +82,7 @@ export default function ProfileTab({ user }) {
             {err && <p className='error-msg'>{err}</p>}
             <button type='submit' className='btn btn-primary auth-btn' disabled={busy}>{busy ? '处理中...' : (isReg ? '注册' : '登录')}</button>
           </form>
-          <p className='auth-link' style={{ cursor: 'pointer' }} onClick={function() { setErr(''); setReg(!isReg); }}>
+          <p className='auth-link' style={{ cursor: 'pointer', color: '#1677ff' }} onClick={function() { setErr(''); setUn(''); setPw(''); setReg(!isReg); }}>
             {isReg ? '已有账号？点击登录' : '没有账号？点击注册'}
           </p>
         </div>

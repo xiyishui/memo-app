@@ -15,7 +15,13 @@ export async function POST(request) {
       token: randomUUID() + '-' + randomUUID(),
     };
     const { data, error } = await supabase.from('users').insert(newUser).select().single();
-    if (error || !data) return NextResponse.json({error: error?.message || '注册失败'}, {status:500});
+    if (error) {
+      if (error.message && (error.message.indexOf('duplicate') >= 0 || error.message.indexOf('unique') >= 0)) {
+        return NextResponse.json({error:'该用户名已经被占用'}, {status:409});
+      }
+      return NextResponse.json({error: error.message || '注册失败'}, {status:500});
+    }
+    if (!data) return NextResponse.json({error:'注册失败'}, {status:500});
     return NextResponse.json({id:data.id,username:data.username,token:data.token},{status:201});
   } catch(e) {
     return NextResponse.json({error:e.message},{status:500});

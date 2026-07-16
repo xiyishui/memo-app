@@ -25,7 +25,7 @@ export async function POST(request) {
     if (!u) return NextResponse.json({e:'x'},{status:401});
     const b = await request.json();
     if (!b.title || !b.content) return NextResponse.json({e:'x'},{status:400});
-    const { data } = await supabase.from('memos').insert({ id: Date.now(), userid: u.id, title: b.title, content: b.content, tags: b.tags||[], pinned: false, createdat: new Date().toISOString(), updatedat: new Date().toISOString() }).select().single();
+    const ins = { id: Date.now(), userid: u.id, title: b.title, content: b.content, pinned: false, createdat: new Date().toISOString(), updatedat: new Date().toISOString() }; if (b.tags && b.tags.length) ins.tags = b.tags; const { data, error: insErr } = await supabase.from('memos').insert(ins).select().single(); if (insErr || !data) return NextResponse.json({error:insErr?.message||'insert failed'},{status:400});
     return NextResponse.json(data, {status:201});
   } catch(e) { return NextResponse.json({e:e.message},{status:500}); }
 }

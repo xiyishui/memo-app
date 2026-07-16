@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,7 +54,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="auth-link">
-          没有账号？<Link href="/register">注册</Link>
+          没有账号？ <Link href="/register">注册</Link>
         </p>
       </div>
     </div>

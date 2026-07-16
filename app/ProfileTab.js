@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from './auth';
 
 export default function ProfileTab({ user }) {
-  const { logout } = useAuth();
+  const { logout, login } = useAuth();
   const [page, setPage] = useState('profile');
   const [trash, setTrash] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -16,12 +16,13 @@ export default function ProfileTab({ user }) {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const fileRef = useRef(null);
-  const { login } = useAuth();
 
   useEffect(() => {
     if (user) {
-      var saved = ''; try { saved = localStorage.getItem('avatar_' + user.id) || ''; } catch(e) {}
-      setAvatar(saved);
+      try {
+        var saved = localStorage.getItem('avatar_' + user.id) || '';
+        setAvatar(saved);
+      } catch(e) {}
     }
   }, [user]);
 
@@ -40,7 +41,7 @@ export default function ProfileTab({ user }) {
   const loadTrash = async () => {
     if (!user) return;
     setLoading(true); setPage('trash');
-    const r = await fetch('/api/trash', { headers: { 'Authorization': 'Bearer ' + user.token } });
+    var r = await fetch('/api/trash', { headers: { 'Authorization': 'Bearer ' + user.token } });
     if (r.ok) setTrash(await r.json());
     setLoading(false);
   };
@@ -48,7 +49,7 @@ export default function ProfileTab({ user }) {
   const loadRecent = async () => {
     if (!user) return;
     setLoading(true); setPage('recent');
-    const r = await fetch('/api/recent', { headers: { 'Authorization': 'Bearer ' + user.token } });
+    var r = await fetch('/api/recent', { headers: { 'Authorization': 'Bearer ' + user.token } });
     if (r.ok) setRecent(await r.json());
     setLoading(false);
   };
@@ -61,9 +62,9 @@ export default function ProfileTab({ user }) {
   const handleLogin = async (e) => {
     e.preventDefault(); setErr(''); setBusy(true);
     try {
-      const ep = isReg ? '/api/auth/register' : '/api/auth/login';
-      const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: un.trim(), password: pw }) });
-      const d = await r.json();
+      var ep = isReg ? '/api/auth/register' : '/api/auth/login';
+      var r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: un.trim(), password: pw }) });
+      var d = await r.json();
       if (!r.ok) throw new Error(d.error || '失败');
       login(d);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
@@ -76,12 +77,12 @@ export default function ProfileTab({ user }) {
         <div className='auth-card'>
           <h1>{isReg ? '注册' : '登录'}</h1>
           <form onSubmit={handleLogin}>
-            <div className='form-group'><label>用户名</label><input type='text' value={un} onChange={e => setUn(e.target.value)} placeholder='至少2位字符' /></div>
-            <div className='form-group'><label>密码</label><input type='password' value={pw} onChange={e => setPw(e.target.value)} placeholder='至少6位字符' /></div>
+            <div className='form-group'><label>用户名</label><input type='text' value={un} onChange={function(e) { setUn(e.target.value); }} placeholder='至少2位字符' /></div>
+            <div className='form-group'><label>密码</label><input type='password' value={pw} onChange={function(e) { setPw(e.target.value); }} placeholder='至少6位字符' /></div>
             {err && <p className='error-msg'>{err}</p>}
             <button type='submit' className='btn btn-primary auth-btn' disabled={busy}>{busy ? '处理中...' : (isReg ? '注册' : '登录')}</button>
           </form>
-          <p className='auth-link' style={{ cursor: 'pointer' }} onClick={() => { setErr(''); setReg(!isReg); }}>
+          <p className='auth-link' style={{ cursor: 'pointer' }} onClick={function() { setErr(''); setReg(!isReg); }}>
             {isReg ? '已有账号？点击登录' : '没有账号？点击注册'}
           </p>
         </div>
@@ -93,15 +94,17 @@ export default function ProfileTab({ user }) {
   if (page === 'trash') {
     return (
       <div>
-        <div className='header'><button className='btn btn-secondary' onClick={() => setPage('profile')}>{'←'} 返回</button><h1>回收站</h1></div>
+        <div className='header'><button className='btn btn-secondary' onClick={function() { setPage('profile'); }}>{'\u2190'} 返回</button><h1>回收站</h1></div>
         {loading ? <div className='loading'>加载中...</div> :
          trash.length === 0 ? <div className='empty'><p>回收站是空的</p></div> :
-         <ul className='memo-list'>{trash.map(t =>
-           <li key={t.id} className='memo-item' style={{ opacity: 0.6 }}>
-             <h3>{t.title}</h3>
-             <button className='btn btn-secondary btn-sm' onClick={() => restoreItem(t.id)}>还原</button>
-           </li>
-         )}</ul>}
+         <ul className='memo-list'>{trash.map(function(t) {
+           return (
+             <li key={t.id} className='memo-item' style={{ opacity: 0.6 }}>
+               <h3>{t.title}</h3>
+               <button className='btn btn-secondary btn-sm' onClick={function() { restoreItem(t.id); }}>还原</button>
+             </li>
+           );
+         })}</ul>}
       </div>
     );
   }
@@ -110,16 +113,18 @@ export default function ProfileTab({ user }) {
   if (page === 'recent') {
     return (
       <div>
-        <div className='header'><button className='btn btn-secondary' onClick={() => setPage('profile')}>{'←'} 返回</button><h1>最近查看</h1></div>
+        <div className='header'><button className='btn btn-secondary' onClick={function() { setPage('profile'); }}>{'\u2190'} 返回</button><h1>最近查看</h1></div>
         {loading ? <div className='loading'>加载中...</div> :
          recent.length === 0 ? <div className='empty'><p>还没有查看过便签</p></div> :
-         <ul className='memo-list'>{recent.map(r =>
-           <li key={r.memoid} className='memo-item'>
-             <Link href={'/memos/' + r.memoid} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-               <h3>{r.title || '无标题'}</h3>
-             </Link>
-           </li>
-         )}</ul>}
+         <ul className='memo-list'>{recent.map(function(r) {
+           return (
+             <li key={r.memoid} className='memo-item'>
+               <Link href={'/memos/' + r.memoid} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                 <h3>{r.title || '无标题'}</h3>
+               </Link>
+             </li>
+           );
+         })}</ul>}
       </div>
     );
   }
@@ -128,7 +133,7 @@ export default function ProfileTab({ user }) {
   return (
     <div className='profile-page'>
       <div className='profile-card'>
-        <div className='profile-avatar-wrap' onClick={() => fileRef.current && fileRef.current.click()}>
+        <div className='profile-avatar-wrap' onClick={function() { fileRef.current && fileRef.current.click(); }}>
           {avatar ? <img src={avatar} className='avatar-img' alt='avatar' /> : <div className='profile-avatar'>{user.username[0]?.toUpperCase()}</div>}
           <div className='camera-overlay'>{'\u{1F4F7}'}</div>
         </div>

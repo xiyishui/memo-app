@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { createHash, randomUUID } from 'crypto';
 import { supabase } from '../../../lib/db';
 

@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 export default function BottomNav({ activeTab, onChange }) {
   const tabs = [
-    { id: 0, label: '便签', icon: '📝' },
-    { id: 1, label: '代办', icon: '✅' },
-    { id: 2, label: '我的', icon: '👤' },
+    { id: 0, label: '便签', icon: '\u{1F4DD}' },
+    { id: 1, label: '代办', icon: '\u2705' },
+    { id: 2, label: '我的', icon: '\u{1F464}' },
   ];
   return (
     <nav className="bottom-nav">

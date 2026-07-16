@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../auth';
@@ -25,7 +25,7 @@ export default function MemoDetail() {
       .then(d => {
         if (d.error) { setError(d.error); } else {
           setMemo(d); setTitle(d.title); setContent(d.content); setTags((d.tags || []).join(', '));
-          fetch('/api/recent', { method: 'POST', headers: hdrs(), body: JSON.stringify({ memoId: Number(id), title: d.title }) });
+          fetch('/api/recent', { method: 'POST', headers: hdrs(), body: JSON.stringify({ memoid: Number(id), title: d.title }) });
         }
         setLoading(false);
       })
@@ -60,7 +60,7 @@ export default function MemoDetail() {
   if (editing) {
     return (
       <div>
-        <div className='header'><button className='btn btn-secondary' onClick={() => setEditing(false)}>← 返回</button><h1>编辑</h1></div>
+        <div className='header'><button className='btn btn-secondary' onClick={() => setEditing(false)}>{'\u2190'}返回</button><h1>编辑</h1></div>
         <div className='form-group'><label>标题</label><input type='text' value={title} onChange={e => setTitle(e.target.value)} /></div>
         <div className='form-group'><label>内容</label><textarea value={content} onChange={e => setContent(e.target.value)} /></div>
         <div className='form-group'><label>标签（逗号分隔）</label><input type='text' value={tags} onChange={e => setTags(e.target.value)} placeholder='工作, 学习' /></div>
@@ -76,7 +76,7 @@ export default function MemoDetail() {
 
   return (
     <div>
-      <div className='header'><button className='btn btn-secondary' onClick={() => router.back()}>← 返回</button><h1>{memo.title}</h1></div>
+      <div className='header'><button className='btn btn-secondary' onClick={() => router.back()}>{'\u2190'}返回</button><h1>{memo.title}</h1></div>
       <div className='memo-detail'>
         {(memo.tags || []).length > 0 && <div className='tags-row'>{(memo.tags || []).map(t => <span key={t} className='tag-mini'>{t}</span>)}</div>}
         <div className='content'>{memo.content}</div>

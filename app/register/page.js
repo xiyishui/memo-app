@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -53,7 +53,7 @@ export default function RegisterPage() {
           </div>
           <div className="form-group">
             <label>密码</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少3位字符" />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少6位字符" />
           </div>
           <div className="form-group">
             <label>确认密码</label>
@@ -65,7 +65,7 @@ export default function RegisterPage() {
           </button>
         </form>
         <p className="auth-link">
-          已有账号？<Link href="/login">登录</Link>
+          已有账号？ <Link href="/login">登录</Link>
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from './auth';
@@ -71,47 +71,47 @@ export default function TodosTab() {
     setTodos(todos.filter(t => t.id !== id));
   };
 
-  if (!user) return <div className="empty"><p>请先登录</p></div>;
+  if (!user) return <div className='empty'><p>请先登录</p></div>;
 
   return (
     <div>
-      <div className="header">
+      <div className='header'>
         <h1>我的代办</h1>
-        <span className="toolbar-count">{todos.filter(t => t && !t.done).length} 未完成</span>
+        <span className='toolbar-count'>{todos.filter(t => t && t.done === false).length} 未完成</span>
       </div>
-      <div className="todo-input-row">
-        <input className="todo-input" placeholder="输入待办事项..."
+      <div className='todo-input-row'>
+        <input className='todo-input' placeholder='输入待办事项...'
           value={text} onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addTodo()}
         />
-        <button className="btn btn-primary" onClick={addTodo}>添加</button>
+        <button className='btn btn-primary' onClick={addTodo}>添加</button>
       </div>
       {loading ? (
-        <div className="loading">加载中...</div>
+        <div className='loading'>加载中...</div>
       ) : todos.length === 0 ? (
-        <div className="empty"><p>还没有待办事项</p></div>
+        <div className='empty'><p>还没有待办事项</p></div>
       ) : (
-        <ul className="todo-list">
+        <ul className='todo-list'>
           {todos.map(todo => (
             <li key={todo.id} className={'todo-item' + (todo.done ? ' done' : '')}>
-              <span className="todo-check" onClick={() => toggleTodo(todo)}>
-                {todo.done ? '☑' : '☐'}
+              <span className='todo-check' onClick={() => toggleTodo(todo)}>
+                {todo.done ? '\u2611' : '\u2610'}
               </span>
               {editingId === todo.id ? (
-                <input className="todo-edit-input" value={editText}
+                <input className='todo-edit-input' value={editText}
                   onChange={e => setEditText(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveEdit(todo.id); if (e.key === 'Escape') setEditingId(null); }}
                   autoFocus
                 />
               ) : (
-                <span className="todo-text" onClick={() => toggleTodo(todo)}>{todo.text}</span>
+                <span className='todo-text' onClick={() => toggleTodo(todo)}>{todo.text}</span>
               )}
               {editingId === todo.id ? (
-                <button className="todo-del" onClick={() => saveEdit(todo.id)}>✔</button>
+                <button className='todo-del' onClick={() => saveEdit(todo.id)}>\u2714</button>
               ) : (
-                <button className="todo-del" onClick={() => startEdit(todo)}>✏</button>
+                <button className='todo-del' onClick={() => startEdit(todo)}>\u270F</button>
               )}
-              <button className="todo-del" onClick={() => removeTodo(todo.id)}>✖</button>
+              <button className='todo-del' onClick={() => removeTodo(todo.id)}>\u2718</button>
             </li>
           ))}
         </ul>

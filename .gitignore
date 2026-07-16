@@ -20,8 +20,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # env
+# env files (do NOT commit real secrets)
 .env
 .env*.local
+# Example env template is tracked separately
+/env.example
 
 # IDE
 .vscode/

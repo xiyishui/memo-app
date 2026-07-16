@@ -14,7 +14,7 @@ export async function GET(request) {
   try {
     const u = await getUser(request);
     if (!u) return NextResponse.json({e:'x'},{status:401});
-    const { data } = await supabase.from('memos').select('*').eq('userId', u.id).order('pinned', { ascending: false }).order('updatedAt', { ascending: false });
+    const { data } = await supabase.from('memos').select('*').eq('userid', u.id).order('pinned', { ascending: false }).order('updatedat', { ascending: false });
     return NextResponse.json(data || []);
   } catch(e) { return NextResponse.json({e:e.message},{status:500}); }
 }
@@ -25,7 +25,7 @@ export async function POST(request) {
     if (!u) return NextResponse.json({e:'x'},{status:401});
     const b = await request.json();
     if (!b.title || !b.content) return NextResponse.json({e:'x'},{status:400});
-    const { data } = await supabase.from('memos').insert({ id: Date.now(), userId: u.id, title: b.title, content: b.content, tags: b.tags||[], pinned: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }).select().single();
+    const { data } = await supabase.from('memos').insert({ id: Date.now(), userid: u.id, title: b.title, content: b.content, tags: b.tags||[], pinned: false, createdat: new Date().toISOString(), updatedat: new Date().toISOString() }).select().single();
     return NextResponse.json(data, {status:201});
   } catch(e) { return NextResponse.json({e:e.message},{status:500}); }
 }

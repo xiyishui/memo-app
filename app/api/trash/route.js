@@ -6,5 +6,5 @@ function user(r) {
 }
 export async function GET(request) {
   const u = user(request); if (!u) return NextResponse.json({e:'x'},{status:401});
-  try { const d = JSON.parse(fs.readFileSync(TF(), 'utf-8')); return NextResponse.json(d.filter(x => x.userId === u.id)); } catch { return NextResponse.json([]); }
+  try { const d = JSON.parse(fs.readFileSync(TF(), 'utf-8')); return NextResponse.json(d.filter(x => x.userid === u.id)); } catch { return NextResponse.json([]); }
 }

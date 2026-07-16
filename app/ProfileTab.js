@@ -114,8 +114,8 @@ export default function ProfileTab({ user }) {
         {loading ? <div className='loading'>加载中...</div> :
          recent.length === 0 ? <div className='empty'><p>还没有查看过便签</p></div> :
          <ul className='memo-list'>{recent.map(r =>
-           <li key={r.memoId} className='memo-item'>
-             <Link href={'/memos/' + r.memoId} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+           <li key={r.memoid} className='memo-item'>
+             <Link href={'/memos/' + r.memoid} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
                <h3>{r.title || '无标题'}</h3>
              </Link>
            </li>

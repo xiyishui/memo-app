@@ -78,7 +78,7 @@ export default function NotesTab({ user }) {
         </div>
       ) : (
         <ul className='memo-list'>
-          {filtered.map(memo => (
+          {filtered.filter(m => m && m.id).map(memo => (
             <li key={memo.id} className={'memo-item' + (memo.pinned ? ' pinned' : '')}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                 <span className='pin-btn' onClick={() => togglePin(memo)} style={{ cursor: 'pointer', fontSize: 16, marginTop: 2, flexShrink: 0 }}>

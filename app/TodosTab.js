@@ -30,7 +30,7 @@ export default function TodosTab() {
     });
     if (res.ok) {
       const todo = await res.json();
-      setTodos([todo, ...todos]);
+      setTodos(todo && todo.id ? [todo, ...todos] : todos);
     }
     setText('');
   };
@@ -77,7 +77,7 @@ export default function TodosTab() {
     <div>
       <div className="header">
         <h1>我的代办</h1>
-        <span className="toolbar-count">{todos.filter(t => !t.done).length} 未完成</span>
+        <span className="toolbar-count">{todos.filter(t => t && !t.done).length} 未完成</span>
       </div>
       <div className="todo-input-row">
         <input className="todo-input" placeholder="输入待办事项..."

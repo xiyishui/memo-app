@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from './auth';
@@ -82,7 +82,7 @@ export default function NotesTab({ user }) {
             <li key={memo.id} className={'memo-item' + (memo.pinned ? ' pinned' : '')}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                 <span className='pin-btn' onClick={() => togglePin(memo)} style={{ cursor: 'pointer', fontSize: 16, marginTop: 2, flexShrink: 0 }}>
-                  {memo.pinned ? '📌' : '📍'}
+                  {memo.pinned ? '\u{1F4CC}' : '\u{1F4CD}'}
                 </span>
                 <Link href={'/memos/' + memo.id} style={{ textDecoration: 'none', color: 'inherit', flex: 1 }}>
                   <h3>{memo.title}</h3>
